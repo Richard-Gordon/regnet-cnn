@@ -28,24 +28,25 @@ class RegNetX(nn.Module):
         """
         super().__init__()
 
-        stages_ic = [stem_width] + stage_widths_out[:-1]
-        stages_mc = stage_widths_mid or stage_widths_out
-        stages_oc = stage_widths_out
-
+        # Prepend stem_width to output widths to form input widths
+        stage_widths_inp = [stem_width] + stage_widths_out[:-1]
+        # No expansion/bottleneck if mid-widths are not defined
+        stage_widths_mid = stage_widths_mid or stage_widths_out
         # Depthwise separable convolutions if groups aren't defined
-        stages_groups = stage_num_groups or stages_mc
+        stage_groups     = stage_num_groups or stage_widths_mid
 
-        stages_kwargs = [
-            {'ic': ic, 'mc': mc, 'oc': oc, 'groups': groups, 'depth': depth}
-                for ic, mc, oc, groups, depth in zip(
-                    stages_ic,
-                    stages_mc,
-                    stages_oc,
-                    stages_groups,
-                    stage_depths,
-            )
-        ]
+        # Convert module arguments into per-stage keyword-argument dictionaries
+        stages_configs = {
+            'ic'    : stage_widths_inp,
+            'mc'    : stage_widths_mid,
+            'oc'    : stage_widths_out,
+            'depth' : stage_depths,
+            'groups': stage_groups,
+        }
+        keywords, stages_args = stages_configs.keys(), zip(*stages_configs.values())
+        stages_kwargs = [dict(zip(keywords, stage_args)) for stage_args in stages_args]
 
+        # Instantiate the network: stem, body, and classification head
         self.stem = RegNetLayer(ic=3, oc=stem_width, ks=3, stride=2)
 
         self.body = self.stages = nn.Sequential(
@@ -55,7 +56,7 @@ class RegNetX(nn.Module):
         self.head = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
-            nn.Linear(stages_oc[-1], num_classes),
+            nn.Linear(stage_widths_out[-1], num_classes),
         )
 
 
@@ -71,14 +72,14 @@ class RegNetStage(nn.Module):
 
     def __init__(self,
         ic: int, mc: int, oc: int,
-        groups: int = 1,
         depth : int = 1,
+        groups: int = 1,
     ):
         super().__init__()
 
         self.blocks = nn.Sequential(
-            RegNetBlock(ic, mc, oc, groups, stride=2), *[
-            RegNetBlock(oc, mc, oc, groups, stride=1) for _ in range(depth-1)
+            RegNetBlock(ic, mc, oc, stride=2, groups=groups), *[
+            RegNetBlock(oc, mc, oc, stride=1, groups=groups) for _ in range(depth-1)
         ])
 
 
@@ -91,16 +92,10 @@ class RegNetBlock(nn.Module):
 
     def __init__(self,
         ic: int, mc: int, oc: int,
-        groups: int = 1,
         stride: int = 1,
+        groups: int = 1,
     ):
         super().__init__()
-
-        self.layers = nn.Sequential(
-            RegNetLayer(ic, mc, ks=1),
-            RegNetLayer(mc, mc, ks=3, groups=groups, stride=stride),
-            RegNetLayer(mc, oc, ks=1, act_type = nn.Identity),
-        )
 
         if stride==1:
             self.residual = nn.Identity()
@@ -111,12 +106,18 @@ class RegNetBlock(nn.Module):
                 stride = stride
             )
 
+        self.layers = nn.Sequential(
+            RegNetLayer(ic, mc, ks=1),
+            RegNetLayer(mc, mc, ks=3, stride=stride, groups=groups),
+            RegNetLayer(mc, oc, ks=1, act_type = nn.Identity),
+        )
+
         self.relu = nn.ReLU(inplace=True)
 
 
     def forward(self, x):
-        fx = self.layers(x)
         rx = self.residual(x)
+        fx = self.layers(x)
         x = fx + rx
         x = self.relu(x)
         return x
