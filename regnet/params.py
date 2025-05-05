@@ -1,18 +1,41 @@
-# Parameters for RegNetX models from the paper: arXiv:2003.13678v1
+# Parameters for RegNetX models defined by the paper: arXiv:2003.13678v1
+#   d = depth, g = group-width, b = bottleneck-factor,
+#   w0 = initial-width, wa = width-slope, wm = width-multiplier
 regnetx_params = {
-    'RegNetX-200MF': {'di': [1, 1,  4,  7], 'wi': [ 24,  56,  152,  368], 'g':   8, 'b': 1, 'e': 30.8, 'wa': 36, 'w0':  24, 'wm': 2.5},
-    'RegNetX-400MF': {'di': [1, 2,  7, 12], 'wi': [ 32,  64,  160,  384], 'g':  16, 'b': 1, 'e': 27.2, 'wa': 24, 'w0':  24, 'wm': 2.5},
-    'RegNetX-600MF': {'di': [1, 3,  5,  7], 'wi': [ 48,  96,  240,  528], 'g':  24, 'b': 1, 'e': 25.5, 'wa': 37, 'w0':  48, 'wm': 2.2},
-    'RegNetX-800MF': {'di': [1, 3,  7,  5], 'wi': [ 64, 128,  288,  672], 'g':  16, 'b': 1, 'e': 24.8, 'wa': 36, 'w0':  56, 'wm': 2.3},
-    'RegNetX-1.6GF': {'di': [2, 4, 10,  2], 'wi': [ 72, 168,  408,  912], 'g':  24, 'b': 1, 'e': 22.9, 'wa': 34, 'w0':  80, 'wm': 2.2},
-    'RegNetX-3.2GF': {'di': [2, 6, 15,  2], 'wi': [ 96, 192,  432, 1008], 'g':  40, 'b': 1, 'e': 21.6, 'wa': 26, 'w0':  88, 'wm': 2.2},
-    'RegNetX-4.0GF': {'di': [2, 5, 14,  2], 'wi': [ 80, 240,  560, 1360], 'g':  48, 'b': 1, 'e': 21.3, 'wa': 39, 'w0':  96, 'wm': 2.4},
-    'RegNetX-6.4GF': {'di': [2, 4, 10,  1], 'wi': [168, 392,  784, 1624], 'g':  56, 'b': 1, 'e': 20.7, 'wa': 61, 'w0': 184, 'wm': 2.1},
-    'RegNetX-8.0GF': {'di': [2, 5, 15,  1], 'wi': [ 80, 240,  720, 1920], 'g': 120, 'b': 1, 'e': 20.5, 'wa': 50, 'w0':  80, 'wm': 2.9},
-    'RegNetX-12GF' : {'di': [2, 5, 11,  1], 'wi': [224, 448,  896, 2240], 'g': 112, 'b': 1, 'e': 20.3, 'wa': 73, 'w0': 168, 'wm': 2.4},
-    'RegNetX-16GF' : {'di': [2, 6, 13,  1], 'wi': [256, 512,  896, 2048], 'g': 128, 'b': 1, 'e': 20.0, 'wa': 56, 'w0': 216, 'wm': 2.1},
-    'RegNetX-32GF' : {'di': [2, 7, 13,  1], 'wi': [336, 672, 1344, 2520], 'g': 168, 'b': 1, 'e': 19.5, 'wa': 70, 'w0': 320, 'wm': 2.0},
+    'RegNetX-200MF': {'d':13, 'w0': 24, 'wa':36.44, 'wm':2.49, 'g':  8, 'b':1 },
+    'RegNetX-400MF': {'d':22, 'w0': 24, 'wa':24.48, 'wm':2.54, 'g': 16, 'b':1 },
+    'RegNetX-600MF': {'d':16, 'w0': 48, 'wa':36.97, 'wm':2.24, 'g': 24, 'b':1 },
+    'RegNetX-800MF': {'d':16, 'w0': 56, 'wa':35.73, 'wm':2.28, 'g': 16, 'b':1 },
+    'RegNetX-1.6GF': {'d':18, 'w0': 80, 'wa':34.01, 'wm':2.25, 'g': 24, 'b':1 },
+    'RegNetX-3.2GF': {'d':25, 'w0': 88, 'wa':26.31, 'wm':2.25, 'g': 48, 'b':1 },
+    'RegNetX-4.0GF': {'d':23, 'w0': 96, 'wa':38.65, 'wm':2.43, 'g': 40, 'b':1 },
+    'RegNetX-6.4GF': {'d':17, 'w0':184, 'wa':60.83, 'wm':2.07, 'g': 56, 'b':1 },
+    'RegNetX-8.0GF': {'d':23, 'w0': 80, 'wa':49.56, 'wm':2.88, 'g':120, 'b':1 },
+    'RegNetX-12GF' : {'d':19, 'w0':168, 'wa':73.36, 'wm':2.37, 'g':112, 'b':1 },
+    'RegNetX-16GF' : {'d':22, 'w0':216, 'wa':55.59, 'wm':2.10, 'g':128, 'b':1 },
+    'RegNetX-32GF' : {'d':23, 'w0':320, 'wa':69.86, 'wm':2.00, 'g':168, 'b':1 },
 }
+
+# Derived parameters for RegNetX models: di = stage-depths, wi = stage-widths
+regnetx_derived = {
+    'RegNetX-200MF': { 'di': [1, 1,  4,  7], 'wi': [ 24,  56,  152,  368] },
+    'RegNetX-400MF': { 'di': [1, 2,  7, 12], 'wi': [ 32,  64,  160,  384] },
+    'RegNetX-600MF': { 'di': [1, 3,  5,  7], 'wi': [ 48,  96,  240,  528] },
+    'RegNetX-800MF': { 'di': [1, 3,  7,  5], 'wi': [ 64, 128,  288,  672] },
+    'RegNetX-1.6GF': { 'di': [2, 4, 10,  2], 'wi': [ 72, 168,  408,  912] },
+    'RegNetX-3.2GF': { 'di': [2, 6, 15,  2], 'wi': [ 96, 192,  432, 1008] },
+    'RegNetX-4.0GF': { 'di': [2, 5, 14,  2], 'wi': [ 80, 240,  560, 1360] },
+    'RegNetX-6.4GF': { 'di': [2, 4, 10,  1], 'wi': [168, 392,  784, 1624] },
+    'RegNetX-8.0GF': { 'di': [2, 5, 15,  1], 'wi': [ 80, 240,  720, 1920] },
+    'RegNetX-12GF' : { 'di': [2, 5, 11,  1], 'wi': [224, 448,  896, 2240] },
+    'RegNetX-16GF' : { 'di': [2, 6, 13,  1], 'wi': [256, 512,  896, 2048] },
+    'RegNetX-32GF' : { 'di': [2, 7, 13,  1], 'wi': [336, 672, 1344, 2520] },
+}
+
+# Merge the derived parameters with the base parameters
+for name, params in regnetx_derived.items():
+    regnetx_params[name].update(params)
+
 
 # Torchvision library model names
 models_aliases_torchvision = {
@@ -53,4 +76,6 @@ def get_model_params(name: str) -> dict:
     """Get model parameters for the given model name"""
     name = models_aliases.get(name, name)
     params = regnetx_params[name]
+    params['stem_kwargs'] = {'ic': 3, 'oc': 32, 'ks': 3, 'stride': 2}
+    params['head_kwargs'] = {'out_features': 1000}
     return params
